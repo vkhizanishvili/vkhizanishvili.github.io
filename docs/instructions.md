@@ -60,10 +60,11 @@ https://vkhizanishvili.github.io/
 
 Токен — это «ключ», которым админка сохраняет изменения в вашем репозитории.
 
-1. GitHub → ваш аватар → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**.
+1. Прямая ссылка: https://github.com/settings/personal-access-tokens/new (войдите в аккаунт сайта).
+   Или вручную: GitHub → **ваш аватар** (правый верхний угол) → **Settings** → в самом низу меню слева **Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**. Это настройки *аккаунта*: во вкладке Settings репозитория раздела Developer settings нет.
    В окне входа админки есть ссылка, которая открывает эту страницу с уже выбранными правами.
 2. **Token name**: «Админка сайта».
-3. **Expiration**: например, 1 год. Когда срок истечёт, создайте новый токен так же.
+3. **Expiration**: например, 1 год — выберите готовый вариант в списке или дату в календарике **не дальше года**: более далёкую дату GitHub может не принять (тогда пишет «never expire», а кнопка создания не срабатывает). Когда срок истечёт, создайте новый токен так же.
 4. **Repository access → Only select repositories** → выберите репозиторий сайта.
 5. **Permissions → Repository permissions → Contents → Read and write**.
 6. Нажмите **Generate token** и скопируйте токен: GitHub показывает его один раз.
