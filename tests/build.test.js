@@ -207,6 +207,36 @@ test("contact form is rendered when configured", async () => {
   }
 });
 
+/** Блок формы `<section class="about__write">…</section>` со страницы «Об авторе» или null. */
+function writeSection(html) {
+  const start = html.indexOf('<section class="about__write"');
+  return start === -1 ? null : html.slice(start, html.indexOf("</section>", start));
+}
+
+test("about page has an open contact form when configured", async () => {
+  const section = writeSection((await build({ site: contactOn() }))["/about/"]);
+  assert.ok(section, "write section on the about page");
+  for (const part of ['data-mode="inline"', ">Написать мне</h2>", 'name="name"', 'name="contact"', 'name="message"', 'name="website"', 'href="/privacy/"', 'data-for="message"']) {
+    assert.ok(section.includes(part), part);
+  }
+  assert.ok(!section.includes('data-action="contact"'), "no button that opens the form");
+  const form = section.match(/<form class="contact__form"[^>]*>/)?.[0];
+  assert.ok(form, "form element");
+  assert.ok(!/\shidden(\s|>|=)/.test(form), `form is open: ${form}`);
+});
+
+test("about page has no form while switched off", () => {
+  assert.equal(writeSection(pages["/about/"]), null);
+  assert.ok(!pages["/about/"].includes('class="contact"'));
+});
+
+test("the painting popup keeps its button form", async () => {
+  const html = (await build({ site: contactOn() }))["/"];
+  assert.ok(/<div class="contact"[^>]*data-mode="popup"/.test(html), "popup mode in the lightbox");
+  assert.ok(html.includes('data-action="contact"'), "button that opens the form");
+  assert.ok(!html.includes('class="about__write"'), "no page form on the gallery");
+});
+
 test("the fallback address never appears whole", async () => {
   const built = await build({ site: contactOn() });
   for (const [url, html] of Object.entries(built)) assert.ok(!html.includes("v.art@yandex.ru"), url);

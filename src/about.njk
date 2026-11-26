@@ -46,5 +46,13 @@ pageClass: about
       {%- endif %}{% endfor %}
     </section>
     {%- endif %}
+
+    {#- Форма «Написать мне»: только когда форма связи включена (или в копии для просмотра) #}
+    {%- if (site | contactForm) or contactPreview %}
+    <section class="about__write" id="write">
+      {%- set contactMode = "inline" %}
+      {%- include "partials/contact-form.njk" %}
+    </section>
+    {%- endif %}
   </div>
 </div>

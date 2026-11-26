@@ -662,6 +662,13 @@ main.container {
   font-weight: 500;
   overflow-wrap: anywhere;
 }
+/* На «Об авторе» форма сразу открыта; отступ сверху даёт заголовок «Написать мне» */
+.contact[data-mode="inline"] {
+  margin-top: 0;
+}
+.contact[data-mode="inline"] .contact__field:first-child {
+  margin-top: 0;
+}
 .contact__fallback-actions {
   display: flex;
   flex-wrap: wrap;

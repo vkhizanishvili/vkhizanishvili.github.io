@@ -116,6 +116,14 @@ test("the copy shows the contact form in preview mode", async () => {
   assert.ok(!block.includes('data-endpoint="https'), "no real endpoint in the copy");
 });
 
+test("the copy shows the about-page form in preview mode", async () => {
+  const about = await readFile(path.join(output, "about", "index.html"), "utf8");
+  const block = about.match(/<div class="contact"[^>]*>/)?.[0];
+  assert.ok(block, "contact form block on the about page");
+  assert.ok(block.includes('data-mode="inline"'), "open form on the page");
+  assert.ok(/\sdata-preview(\s|>)/.test(block), "preview mode is on");
+});
+
 test("fonts are inside the stylesheets, so the browser loads them from disk", async () => {
   const dir = path.join(output, "assets", "css");
   for (const name of await readdir(dir)) {
