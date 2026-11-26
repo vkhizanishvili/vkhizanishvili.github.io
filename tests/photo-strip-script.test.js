@@ -36,3 +36,18 @@ test("visiblePhotoHeight shrinks with scrolling down to the strip", () => {
 test("visiblePhotoHeight ignores overscroll bounce", () => {
   assert.equal(PS.visiblePhotoHeight(-60, { start: 447, strip: 188 }), 447);
 });
+
+// --- Масштаб вместо высоты (после проверки на iPad) -------------------------
+
+test("minPhotoScale shrinks the photo to the strip", () => {
+  assert.equal(PS.minPhotoScale({ start: 447, strip: 188 }), 188 / 447);
+  assert.equal(PS.minPhotoScale({ start: 206, strip: 206 }), 1, "landscape phone: no shrinking");
+});
+
+test("photoScaleAt follows the visible height and ignores overscroll", () => {
+  const sizes = { start: 447, strip: 188 };
+  assert.equal(PS.photoScaleAt(0, sizes), 1);
+  assert.equal(PS.photoScaleAt(100, sizes), 347 / 447);
+  assert.equal(PS.photoScaleAt(5000, sizes), 188 / 447);
+  assert.equal(PS.photoScaleAt(-60, sizes), 1);
+});

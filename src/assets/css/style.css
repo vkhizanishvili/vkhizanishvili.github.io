@@ -358,7 +358,6 @@ main.container {
   .lightbox__layout {
     --photo-start: 55dvh;
     --photo-strip: 50vw;
-    --photo-visible: var(--photo-start);
     display: block;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -387,8 +386,9 @@ main.container {
 }
 @media (max-width: 959px) {
   /* Блок держит постоянную высоту и «прилипает» с отрицательным top: видна его
-     нижняя часть, не ниже полоски. Рамка внизу блока — ровно с видимую часть,
-     картина в ней вписывается целиком. */
+     нижняя часть, не ниже полоски. Рамка — во весь блок и при прокрутке
+     уменьшается от нижнего края (transform: scale), так что картина целиком
+     всегда в видимой части и не «прыгает» вверх-вниз. */
   .lightbox__stage {
     position: sticky;
     top: calc(var(--photo-strip) - var(--photo-start));
@@ -399,15 +399,33 @@ main.container {
   }
   .lightbox__frame {
     position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    inset: 0;
     box-sizing: border-box;
-    height: var(--photo-visible);
-    /* место под крестик: сверху, пока фото большое; по бокам, когда оно — полоска */
-    padding-top: clamp(0.75rem, calc(var(--photo-visible) - var(--photo-strip)), 3.5rem);
-    padding-bottom: 0.75rem;
-    padding-inline: clamp(0.75rem, calc(3.25rem - (var(--photo-visible) - var(--photo-strip))), 3.25rem);
+    /* сверху — место под крестик; при уменьшении картина уходит от него к центру */
+    padding: 3.5rem 0.75rem 0.75rem;
+    transform-origin: 50% 100%;
+    /* запасной вариант для браузеров без анимации по прокрутке: масштаб ставит скрипт */
+    transform: scale(var(--photo-k, 1));
+    will-change: transform;
+  }
+}
+@supports (animation-timeline: scroll()) {
+  @media (max-width: 959px) {
+    /* Уменьшение ведёт сам браузер — в том же кадре, что и прокрутку */
+    .lightbox__frame {
+      transform: none;
+      animation: photo-shrink linear both;
+      animation-timeline: scroll(nearest block);
+      animation-range: 0px calc(var(--photo-start) - var(--photo-strip));
+    }
+  }
+}
+@keyframes photo-shrink {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(var(--photo-scale-min, 1));
   }
 }
 
