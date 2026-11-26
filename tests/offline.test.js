@@ -116,8 +116,14 @@ test("the copy shows the contact form in preview mode", async () => {
   assert.ok(!block.includes('data-endpoint="https'), "no real endpoint in the copy");
 });
 
-test("fonts are inside the stylesheet, so the browser loads them from disk", async () => {
-  const css = await readFile(path.join(output, "assets", "css", "style.css"), "utf8");
-  assert.ok(!/url\(["']?\.\.\/fonts\//.test(css), "font files must not be referenced by path");
-  assert.equal((css.match(/url\("data:font\/woff2;base64,[A-Za-z0-9+/=]+"\)/g) || []).length, 2);
+test("fonts are inside the stylesheets, so the browser loads them from disk", async () => {
+  const dir = path.join(output, "assets", "css");
+  for (const name of await readdir(dir)) {
+    if (!name.endsWith(".css")) continue;
+    const css = await readFile(path.join(dir, name), "utf8");
+    assert.ok(!/url\(["']?\.\.\/fonts\//.test(css), name + ": font files must not be referenced by path");
+  }
+  const theme = await readFile(path.join(dir, "theme.css"), "utf8");
+  assert.equal((theme.match(/url\("data:font\/woff2;base64,[A-Za-z0-9+/=]+"\)/g) || []).length, 2, "Onest: cyrillic + latin");
+  assert.ok(!/@font-face\s*\{/.test(await readFile(path.join(dir, "style.css"), "utf8")), "no @font-face rule left in style.css");
 });

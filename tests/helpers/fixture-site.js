@@ -35,7 +35,7 @@ export async function prepareFixtureSite() {
   // Не копируем ни то, что пишет админка, ни то, что читает сайт: если они
   // разойдутся, в копии не окажется настоящего содержимого, которое скрыло бы ошибку.
   const siteReads = ["content/paintings", "content/series", "_data/site.json", "_data/about.json", "_data/privacy.json", "_data/theme.json", "uploads"];
-  const skip = new Set([...siteReads, folder("paintings"), folder("series"), file("site"), file("about"), file("privacy"), media]);
+  const skip = new Set([...siteReads, folder("paintings"), folder("series"), file("site"), file("about"), file("privacy"), file("theme"), media]);
   await cp("src", input, {
     recursive: true,
     filter: (from) => !skip.has(path.relative("src", from).split(path.sep).join("/")),
@@ -45,7 +45,7 @@ export async function prepareFixtureSite() {
   await cp(`${FIXTURES}/site.json`, path.join(input, file("site")));
   await cp(`${FIXTURES}/about.json`, path.join(input, file("about")));
   await cp(`${FIXTURES}/privacy.json`, path.join(input, file("privacy")));
-  await cp(`${FIXTURES}/theme.json`, path.join(input, "_data/theme.json"));
+  await cp(`${FIXTURES}/theme.json`, path.join(input, file("theme")));
 
   // Каждое фото, на которое ссылаются образцовые данные, кладём туда, куда его
   // положила бы админка (media_folder), а ссылка на него — как в админке (public_folder).

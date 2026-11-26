@@ -230,6 +230,53 @@ collections:
             buttons: [bold, italic, link, heading-two, heading-three, bulleted-list, numbered-list]
             editor_components: []
 
+      - name: theme
+        label: Оформление
+        file: src/_data/theme.json
+        description: Цвета, шрифты и размер текста. Изменения появятся на сайте через 1–2 минуты после сохранения.
+        fields:
+          - label: Цвет фона
+            name: background
+            widget: color
+            allowInput: true
+            default: "#ffffff"
+          - label: Цвет текста
+            name: text
+            widget: color
+            allowInput: true
+            default: "#1b1b1b"
+            hint: Если текст будет плохо читаться на выбранном фоне, сайт сам возьмёт чёрный или белый.
+          - label: Шрифт заголовков
+            name: heading_font
+            widget: select
+            default: onest
+            options: &fonts
+              - { label: "Onest", value: onest }
+              - { label: "Inter", value: inter }
+              - { label: "Manrope", value: manrope }
+              - { label: "Montserrat", value: montserrat }
+              - { label: "IBM Plex Sans", value: ibm-plex-sans }
+              - { label: "Raleway", value: raleway }
+              - { label: "PT Serif (с засечками)", value: pt-serif }
+              - { label: "Lora (с засечками)", value: lora }
+              - { label: "Playfair Display (с засечками)", value: playfair-display }
+              - { label: "Cormorant Garamond (с засечками)", value: cormorant-garamond }
+          - label: Шрифт текста
+            name: body_font
+            widget: select
+            default: onest
+            options: *fonts
+          - label: Размер текста
+            name: size
+            widget: select
+            default: normal
+            hint: Меняется весь сайт пропорционально — и текст, и заголовки.
+            options:
+              - { label: "Мельче", value: small }
+              - { label: "Обычный", value: normal }
+              - { label: "Крупнее", value: large }
+              - { label: "Ещё крупнее", value: xlarge }
+
       - name: site
         label: Настройки сайта
         file: src/_data/site.json

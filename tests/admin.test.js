@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import yaml from "js-yaml";
 import { STATUSES } from "../src/_lib/paintings.js";
+import { FONTS, SIZES } from "../src/_lib/theme.js";
 
 const config = yaml.load(readFileSync("src/admin/config.yml", "utf8"));
 const collection = (name) => config.collections.find((c) => c.name === name);
@@ -78,7 +79,7 @@ function assertCovers(fields, data, where) {
 
 test("settings files exist and every value in them is editable", () => {
   const pages = collection("pages");
-  for (const [name, file] of [["site", "src/_data/site.json"], ["about", "src/_data/about.json"]]) {
+  for (const [name, file] of [["site", "src/_data/site.json"], ["about", "src/_data/about.json"], ["theme", "src/_data/theme.json"]]) {
     const entry = pages.files.find((f) => f.name === name);
     assert.ok(entry, `file entry ${name} missing`);
     assert.equal(entry.file, file);
@@ -100,4 +101,17 @@ test("privacy page is editable", () => {
   assert.ok(entry, "privacy file entry missing");
   assert.equal(entry.file, "src/_data/privacy.json");
   assert.deepEqual(fieldNames(entry.fields).sort(), ["heading", "text"]);
+});
+
+test("admin offers the theme settings", () => {
+  const entry = collection("pages").files.find((f) => f.name === "theme");
+  assert.ok(entry, "theme file entry missing");
+  assert.equal(entry.file, "src/_data/theme.json");
+  const field = (name) => entry.fields.find((f) => f.name === name);
+  for (const name of ["background", "text"]) assert.equal(field(name)?.widget, "color", name);
+  for (const name of ["heading_font", "body_font"]) {
+    assert.equal(field(name)?.widget, "select", name);
+    assert.deepEqual(field(name).options.map((o) => o.value), Object.keys(FONTS), name);
+  }
+  assert.deepEqual(field("size").options.map((o) => o.value), Object.keys(SIZES));
 });

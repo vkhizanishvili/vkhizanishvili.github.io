@@ -80,13 +80,18 @@ export async function makeOfflineCopy({ input = "src", output = "offline/site" }
     await writeFile(full, relativizeHtml(await readFile(full, "utf8"), file));
   }
 
-  const cssFile = path.join(output, "assets", "css", "style.css");
-  let css = await readFile(cssFile, "utf8");
-  for (const [whole, rel] of [...css.matchAll(FONT_URL)]) {
-    const font = await readFile(path.join(path.dirname(cssFile), rel));
-    css = css.replace(whole, `url("data:font/woff2;base64,${font.toString("base64")}")`);
+  // Шрифты — во все таблицы стилей (выбранные в «Оформлении» лежат в theme.css)
+  const cssDir = path.join(output, "assets", "css");
+  for (const name of await readdir(cssDir)) {
+    if (!name.endsWith(".css")) continue;
+    const cssFile = path.join(cssDir, name);
+    let css = await readFile(cssFile, "utf8");
+    for (const [whole, rel] of [...css.matchAll(FONT_URL)]) {
+      const font = await readFile(path.join(cssDir, rel));
+      css = css.replace(whole, `url("data:font/woff2;base64,${font.toString("base64")}")`);
+    }
+    await writeFile(cssFile, css);
   }
-  await writeFile(cssFile, css);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
