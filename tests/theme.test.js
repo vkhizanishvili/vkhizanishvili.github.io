@@ -81,3 +81,9 @@ test("default colours keep the hand-tuned palette, others derive shades", () => 
   const dark = themeCss(normalizeTheme({ background: "#1d1d1f", text: "#f2f2f2" }));
   for (const v of ["--muted", "--line", "--frame"]) assert.ok(dark.includes(`${v}: color-mix(in srgb, var(--text) `), v);
 });
+
+test("status colours stay readable on a custom background", () => {
+  assert.ok(!themeCss(normalizeTheme({})).includes("--sold"), "default look keeps today's status colours");
+  const dark = themeCss(normalizeTheme({ background: "#1d1d1f", text: "#f2f2f2" }));
+  for (const v of ["--sold", "--reserved"]) assert.ok(dark.includes(`${v}: color-mix(in srgb, `) && dark.includes("var(--text)"), v);
+});

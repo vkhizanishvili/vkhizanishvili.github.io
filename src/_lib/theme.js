@@ -115,6 +115,9 @@ export function themeCss(theme) {
         "  --muted: color-mix(in srgb, var(--text) 58%, var(--bg));",
         "  --line: color-mix(in srgb, var(--text) 11%, var(--bg));",
         "  --frame: color-mix(in srgb, var(--text) 4%, var(--bg));",
+        // статусы сохраняют свой цвет, но подстраивают яркость под фон — иначе на тёмном не читаются
+        "  --reserved: color-mix(in srgb, #a86b16 65%, var(--text));",
+        "  --sold: color-mix(in srgb, #9b3b32 65%, var(--text));",
       ];
   const root = [
     ":root {",
