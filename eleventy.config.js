@@ -14,6 +14,7 @@ import {
 } from "./src/_lib/paintings.js";
 import { contactsList } from "./src/_lib/contacts.js";
 import { contactFormConfig } from "./src/_lib/contact-form.js";
+import { FONT_SOURCES } from "./src/_lib/theme.js";
 
 const md = markdownIt({ html: false, linkify: true, typographer: true });
 
@@ -79,12 +80,8 @@ export default function (eleventyConfig) {
 
   eleventyConfig.addPassthroughCopy({ "src/assets": "assets" });
   eleventyConfig.addPassthroughCopy({ "src/admin": "admin" });
-  eleventyConfig.addPassthroughCopy({
-    "node_modules/@fontsource-variable/onest/files/onest-cyrillic-wght-normal.woff2":
-      "assets/fonts/onest-cyrillic.woff2",
-    "node_modules/@fontsource-variable/onest/files/onest-latin-wght-normal.woff2":
-      "assets/fonts/onest-latin.woff2",
-  });
+  // Все шрифты из списка «Оформления» лежат на сайте; скачиваются только выбранные
+  eleventyConfig.addPassthroughCopy(Object.fromEntries(FONT_SOURCES.map(({ from, to }) => [from, to])));
 
   // Картины: только опубликованные, отсортированные, с обработанными фото.
   eleventyConfig.addCollection("works", async (api) => {
