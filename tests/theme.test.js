@@ -75,3 +75,9 @@ test("every font source exists in node_modules", () => {
   assert.equal(FONT_SOURCES.length, 22);
   for (const { from } of FONT_SOURCES) assert.ok(existsSync(from), from);
 });
+
+test("default colours keep the hand-tuned palette, others derive shades", () => {
+  assert.ok(!themeCss(normalizeTheme({})).includes("--muted"), "today's warm greys stay in style.css");
+  const dark = themeCss(normalizeTheme({ background: "#1d1d1f", text: "#f2f2f2" }));
+  for (const v of ["--muted", "--line", "--frame"]) assert.ok(dark.includes(`${v}: color-mix(in srgb, var(--text) `), v);
+});

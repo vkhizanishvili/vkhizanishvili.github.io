@@ -16,7 +16,7 @@ const NBSP = " ";
 let inputDir;
 let outDir;
 
-async function build({ pathPrefix, site, about } = {}) {
+async function build({ pathPrefix, site, about, theme } = {}) {
   const elev = new Eleventy(inputDir, outDir, {
     quietMode: true,
     configPath: "eleventy.config.js",
@@ -29,6 +29,7 @@ async function build({ pathPrefix, site, about } = {}) {
       cfg.setUseGitIgnore(false);
       if (site) cfg.addGlobalData("site", site);
       if (about) cfg.addGlobalData("about", about);
+      if (theme !== undefined) cfg.addGlobalData("theme", theme);
     },
   });
   const pages = await elev.toJSON();
@@ -232,4 +233,37 @@ test("path prefix for github.io/<repo>/ is applied to links, styles and images",
   assert.match(html, /srcset="\/my-repo\/img\//);
   assert.match(html, /src="\/my-repo\/assets\/js\/gallery\.js"/);
   assert.ok(!/srcset="\/img\//.test(html), "no unprefixed image urls (including inside <template>)");
+});
+
+// --- Оформление из админки --------------------------------------------------
+
+const preloadHref = (html) => html.match(/<link rel="preload" href="([^"]+)"[^>]*as="font"/)?.[1];
+
+test("pages link the theme stylesheet after the main one", () => {
+  for (const url of ["/", "/about/"]) {
+    const html = pages[url];
+    const main = html.indexOf('href="/assets/css/style.css"');
+    const theme = html.indexOf('href="/assets/css/theme.css"');
+    assert.ok(main > -1 && theme > main, `${url}: theme.css after style.css`);
+  }
+});
+
+test("default theme keeps today's look", () => {
+  const css = pages["/assets/css/theme.css"];
+  assert.ok(css, "theme.css is built");
+  for (const part of ["--bg: #ffffff", "--text: #1b1b1b", '"Onest"', "--base-size: 100%"]) assert.ok(css.includes(part), part);
+  assert.equal(preloadHref(pages["/"]), "/assets/fonts/onest-cyrillic.woff2");
+});
+
+test("admin theme reaches the stylesheet", async () => {
+  const built = await build({ theme: { background: "#1D1D1F", text: "#f2f2f2", heading_font: "playfair-display", body_font: "inter", size: "large" } });
+  const css = built["/assets/css/theme.css"];
+  for (const part of ["--bg: #1d1d1f", '"Playfair Display"', '"Inter"', "--base-size: 112.5%"]) assert.ok(css.includes(part), part);
+  assert.ok(!css.includes("Onest"), "only the chosen fonts");
+  assert.equal(preloadHref(built["/"]), "/assets/fonts/inter-cyrillic.woff2");
+});
+
+test("a missing theme file falls back to defaults", async () => {
+  const css = (await build({ theme: null }))["/assets/css/theme.css"];
+  for (const part of ["--bg: #ffffff", "--text: #1b1b1b", '"Onest"']) assert.ok(css.includes(part), part);
 });

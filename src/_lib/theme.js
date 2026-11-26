@@ -102,12 +102,25 @@ export function normalizeTheme(raw) {
 
 const stack = (id) => `"${FONTS[id].family}", ${FONTS[id].fallback}`;
 
-/** CSS оформления: переменные и @font-face выбранных шрифтов (без повторов). */
+/**
+ * CSS оформления: переменные и @font-face выбранных шрифтов (без повторов).
+ * При цветах по умолчанию оттенки не переопределяются — остаётся подобранная
+ * вручную тёплая палитра из style.css; при других — считаются из фона и текста.
+ */
 export function themeCss(theme) {
+  const defaultColors = theme.background === DEFAULT_THEME.background && theme.text === DEFAULT_THEME.text;
+  const shades = defaultColors
+    ? []
+    : [
+        "  --muted: color-mix(in srgb, var(--text) 58%, var(--bg));",
+        "  --line: color-mix(in srgb, var(--text) 11%, var(--bg));",
+        "  --frame: color-mix(in srgb, var(--text) 4%, var(--bg));",
+      ];
   const root = [
     ":root {",
     `  --bg: ${theme.background};`,
     `  --text: ${theme.text};`,
+    ...shades,
     `  --font-body: ${stack(theme.bodyFont)};`,
     `  --font-heading: ${stack(theme.headingFont)};`,
     `  --base-size: ${SIZES[theme.size]};`,

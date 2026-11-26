@@ -14,7 +14,18 @@ import {
 } from "./src/_lib/paintings.js";
 import { contactsList } from "./src/_lib/contacts.js";
 import { contactFormConfig } from "./src/_lib/contact-form.js";
-import { FONT_SOURCES } from "./src/_lib/theme.js";
+import { FONT_SOURCES, normalizeTheme, themeCss, preloadFont } from "./src/_lib/theme.js";
+
+let themeWarned = false;
+/** Оформление из админки → проверенное; о заменённом нечитаемом цвете текста — одно предупреждение. */
+function theme(raw) {
+  const t = normalizeTheme(raw);
+  if (t.textAdjusted && !themeWarned) {
+    console.warn(`[theme] Цвет текста плохо читается на этом фоне — сайт использует ${t.text}`);
+    themeWarned = true;
+  }
+  return t;
+}
 
 const md = markdownIt({ html: false, linkify: true, typographer: true });
 
@@ -106,6 +117,8 @@ export default function (eleventyConfig) {
   eleventyConfig.addFilter("orderUrl", telegramOrderUrl);
   eleventyConfig.addFilter("contactsList", contactsList);
   eleventyConfig.addFilter("contactForm", contactFormConfig);
+  eleventyConfig.addFilter("themeCss", (raw) => themeCss(theme(raw)));
+  eleventyConfig.addFilter("themePreload", (raw) => preloadFont(theme(raw)));
   eleventyConfig.addFilter("markdown", (text) => md.render(String(text ?? "")));
   // baseUrl — вычисляемое значение из src/_data/eleventyComputed.js
   eleventyConfig.addFilter("absoluteUrl", (url, base) => (base ? `${base}${url}` : url));
