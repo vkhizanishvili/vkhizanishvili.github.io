@@ -121,3 +121,12 @@ test("the theme section tells when changes appear on the site", () => {
   const entry = collection("pages").files.find((f) => f.name === "theme");
   assert.ok(entry.fields.some((f) => String(f.hint ?? "").includes("1–2 минуты")), "a field hint mentions 1–2 минуты");
 });
+
+test("the contact form switch says it covers both places", () => {
+  const site = config.collections.find((c) => c.name === "pages").files.find((f) => f.name === "site");
+  const form = site.fields.find((f) => f.name === "contact_form");
+  const enabled = form.fields.find((f) => f.name === "enabled");
+  for (const text of [form.hint, enabled.label]) {
+    assert.ok(text.includes("окне картины") && text.includes("Об авторе"), text);
+  }
+});

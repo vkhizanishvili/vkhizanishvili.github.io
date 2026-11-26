@@ -226,7 +226,7 @@ collections:
           - label: Текст
             name: text
             widget: richtext
-            hint: Заполните всё в [квадратных скобках] и покажите текст юристу. Ссылка на эту страницу стоит под формой «Связаться с автором».
+            hint: Заполните всё в [квадратных скобках] и покажите текст юристу. Ссылка на эту страницу стоит под формами связи (в окне картины и на странице «Об авторе»).
             buttons: [bold, italic, link, heading-two, heading-three, bulleted-list, numbered-list]
             editor_components: []
 
@@ -322,8 +322,8 @@ collections:
             name: contact_form
             widget: object
             collapsed: true
-            hint: Кнопка «Связаться с автором» в окне картины. Появится, когда включите и заполните оба поля — см. инструкцию docs/contact-form-setup.md.
+            hint: Кнопка «Связаться с автором» в окне картины и форма «Написать мне» на странице «Об авторе». Появятся, когда включите и заполните оба поля — см. инструкцию docs/contact-form-setup.md.
             fields:
-              - { label: "Показывать кнопку «Связаться с автором»", name: enabled, widget: boolean, default: false, required: false }
+              - { label: "Показывать форму связи (в окне картины и на странице «Об авторе»)", name: enabled, widget: boolean, default: false, required: false }
               - { label: Адрес функции, name: endpoint, widget: string, required: false, hint: "Ссылка из Яндекс Облака, см. инструкцию. Начинается с https://" }
               - { label: Почта для запасного пути, name: fallback_email, widget: string, required: false, hint: "Ваш адрес. Посетитель увидит его, только если отправка не удалась" }

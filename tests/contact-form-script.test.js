@@ -143,3 +143,81 @@ test("buildMailto without a painting", () => {
   assert.ok(!params.body.includes("Картина:"), params.body);
   assert.ok(params.body.includes("Страница: https://x/about/"), params.body);
 });
+
+// --- Поведение формы на странице (упрощённая страница в песочнице) ----------
+
+/** Форма «Написать мне» на упрощённой странице с ручными часами и таймерами. */
+function inlineFormPage() {
+  let clock = 100_000;
+  const timers = [];
+  function el(extra = {}) {
+    const listeners = {};
+    return {
+      hidden: false, dataset: {}, textContent: "", disabled: false, value: "",
+      classList: { toggle() {} }, scrollIntoView() {}, focus() {}, select() {},
+      addEventListener(type, fn) { (listeners[type] ||= []).push(fn); },
+      fire(type) { for (const fn of listeners[type] || []) fn({ preventDefault() {} }); },
+      closest: () => el(), ...extra,
+    };
+  }
+  const fields = { name: el({ value: "Анна" }), contact: el({ value: "a@b.ru" }), message: el({ value: "Здравствуйте" }), website: el() };
+  const submit = el();
+  const form = el({ elements: { namedItem: (n) => fields[n] }, querySelector: () => submit, querySelectorAll: () => [] });
+  const root = el({
+    hidden: true,
+    dataset: { mode: "inline", endpoint: "https://f.example/abc", mailUser: "v", mailDomain: "y.ru" },
+    querySelector: (selector) => (selector === ".contact__form" ? form : el()),
+  });
+  const sent = [];
+  const context = {
+    document: { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [root] },
+    location: { origin: "https://x.github.io", pathname: "/about/" },
+    fetch: async (url, options) => {
+      sent.push(JSON.parse(options.body));
+      return { ok: true, json: async () => ({ ok: true }) };
+    },
+    AbortController, clearTimeout() {}, console, navigator: {},
+    setTimeout: (fn, ms) => timers.push({ at: clock + (ms || 0), fn }),
+    Date: { now: () => clock },
+  };
+  context.window = context;
+  vm.createContext(context);
+  vm.runInContext(readFileSync("src/assets/js/contact-form.js", "utf8"), context);
+  return {
+    root, form, sent,
+    advance: (ms) => { clock += ms; },
+    async runTimers() {
+      while (timers.length) {
+        timers.sort((a, b) => a.at - b.at);
+        const timer = timers.shift();
+        clock = Math.max(clock, timer.at);
+        timer.fn();
+        await new Promise((resolve) => setImmediate(resolve));
+      }
+      await new Promise((resolve) => setImmediate(resolve));
+    },
+  };
+}
+
+test("the page form opens by itself and links to the page", async () => {
+  const page = inlineFormPage();
+  assert.equal(page.root.hidden, false, "inline form is visible without a button");
+  page.advance(5000);
+  page.form.fire("submit");
+  await page.runTimers();
+  assert.equal(page.sent.length, 1);
+  assert.equal(page.sent[0].link, "https://x.github.io/about/");
+  assert.equal(page.sent[0].painting, "");
+});
+
+test("a click into the form while sending does not make the message look like a bot", async () => {
+  // Safari: щелчок по кнопке не даёт ей фокус — первое касание формы может случиться уже во время «Отправляем…»
+  const page = inlineFormPage();
+  page.advance(1000); // поля заполнил браузер, их не касались
+  page.form.fire("submit");
+  page.advance(500);
+  page.form.fire("focusin");
+  await page.runTimers();
+  assert.equal(page.sent.length, 1);
+  assert.ok(page.sent[0].elapsed >= FUNCTION_MIN_FILL_MS, `elapsed ${page.sent[0].elapsed} is above the function's threshold`);
+});

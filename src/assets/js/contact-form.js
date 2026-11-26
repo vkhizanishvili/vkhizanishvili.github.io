@@ -206,10 +206,12 @@
 
       const myToken = token;
       const details = { ...values, painting: painting.title, link: pageLink(location, painting.id) };
+      // Отсчёт фиксируем при нажатии: первое касание формы во время ожидания не должно его сдвинуть
+      const startedAt = openedAt;
       setSending(true);
-      await new Promise((resolve) => setTimeout(resolve, waitBeforeSend(openedAt, Date.now())));
+      await new Promise((resolve) => setTimeout(resolve, waitBeforeSend(startedAt, Date.now())));
       if (myToken !== token) return; // пока ждали, окно переключили на другую картину
-      const payload = { ...details, website: field("website").value, elapsed: Date.now() - openedAt };
+      const payload = { ...details, website: field("website").value, elapsed: Date.now() - startedAt };
       const ok = await sendWithRetry(() => attemptSend(fetch, endpoint, payload, TIMEOUT_MS));
       if (myToken !== token) return; // окно уже показывает другую картину
       setSending(false);
