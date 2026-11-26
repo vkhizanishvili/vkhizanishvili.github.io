@@ -1,0 +1,50 @@
+---
+layout: layouts/base.njk
+title: Об авторе
+permalink: /about/
+pageClass: about
+---
+{%- set contacts = about.contacts | contactsList %}
+<div class="about">
+  {%- if about.photo %}
+  <figure class="about__photo">
+    {% image about.photo, site.title, "(min-width: 960px) 40vw, 92vw" %}
+  </figure>
+  {%- endif %}
+  <div class="about__text">
+    <h1>{{ about.heading or "Об авторе" }}</h1>
+    {%- if about.bio %}
+    <div class="prose">{{ about.bio | markdown | safe }}</div>
+    {%- endif %}
+
+    {%- for section in about.sections %}{% if section.title or section.text %}
+    <section class="about__section">
+      {%- if section.title %}<h2>{{ section.title }}</h2>{% endif %}
+      <div class="prose">{{ section.text | markdown | safe }}</div>
+    </section>
+    {%- endif %}{% endfor %}
+
+    {%- if contacts.length or about.links.length %}
+    <section class="contacts" id="contacts">
+      <h2>Контакты</h2>
+      <dl class="contacts__list">
+        {%- for c in contacts %}
+        <div class="contacts__item">
+          <dt>{{ c.label }}</dt>
+          <dd>{% if c.href %}<a href="{{ c.href }}"{% if c.href.startsWith("http") %} target="_blank" rel="noopener"{% endif %}>{{ c.text }}</a>{% else %}{{ c.text }}{% endif %}</dd>
+        </div>
+        {%- endfor %}
+        {%- for link in about.links %}{% if link.url %}
+        <div class="contacts__item">
+          <dt>{{ link.label or "Ссылка" }}</dt>
+          <dd><a href="{{ link.url }}" target="_blank" rel="noopener">{{ link.url | replace("https://", "") | replace("http://", "") }}</a></dd>
+        </div>
+        {%- endif %}{% endfor %}
+      </dl>
+      {%- for c in contacts %}{% if c.metaNote %}
+      <p class="contacts__note">* Instagram принадлежит компании Meta, признанной экстремистской организацией и запрещённой в России.</p>
+      {%- endif %}{% endfor %}
+    </section>
+    {%- endif %}
+  </div>
+</div>

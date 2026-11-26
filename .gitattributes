@@ -1,0 +1,7 @@
+# Единые переносы строк (LF) — как у админки и у сборки на GitHub
+* text=auto eol=lf
+*.webp binary
+*.jpg binary
+*.png binary
+*.zip binary
+*.woff2 binary

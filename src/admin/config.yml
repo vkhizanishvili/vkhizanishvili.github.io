@@ -1,0 +1,282 @@
+# Админка сайта — Sveltia CMS. Документация: https://sveltiacms.app/en/docs
+#
+# Репозиторий сайта на GitHub: логин/название. Сайт — https://vkhizanishvili.github.io/
+
+backend:
+  name: github
+  repo: vkhizanishvili/vkhizanishvili.github.io
+  branch: main
+
+# Загруженные фото складываются в src/uploads
+media_folder: /src/uploads
+public_folder: /uploads
+
+media_libraries:
+  default:
+    config:
+      slugify_filename: true
+      transformations:
+        # Фото автоматически переводятся в WebP и уменьшаются до 2400 px,
+        # чтобы репозиторий не разрастался. Сайт сам нарежет нужные размеры.
+        raster_image:
+          format: webp
+          quality: 85
+          width: 2400
+          height: 2400
+
+# Названия на кириллице — имена файлов делаем латиницей
+slug:
+  encoding: ascii
+  clean_accents: true
+
+# Окно предпросмотра выключено: сайт собирается на GitHub, предпросмотр в админке был бы неточным
+editor:
+  preview: false
+
+collections:
+  # ------------------------------------------------------------------ Картины
+  - name: paintings
+    label: Картины
+    label_singular: картину
+    description: Каждая картина — отдельная запись. Изменения появляются на сайте через 1–2 минуты после сохранения.
+    folder: src/content/paintings
+    extension: md
+    format: frontmatter
+    create: true
+    slug: "{{uuid_shorter}}"
+    identifier_field: title
+    thumbnail: image
+    sortable_fields: [date, title, price, order]
+    view_filters:
+      - { label: В наличии, field: status, pattern: available }
+      - { label: Проданы, field: status, pattern: sold }
+      - { label: Скрытые (черновики), field: draft, pattern: true }
+    fields:
+      - label: Название
+        name: title
+        widget: string
+      - label: Главное фото
+        name: image
+        widget: image
+        hint: Фото картины целиком, без рамки и фона, если возможно.
+      - label: Дополнительные фото
+        name: photos
+        widget: image
+        multiple: true
+        required: false
+        hint: Детали, фактура, картина в интерьере. Можно выбрать несколько.
+      - label: Цена, ₽
+        name: price
+        widget: number
+        value_type: int
+        min: 0
+        required: false
+        hint: Только число, без пробелов и знака ₽. Пусто — на сайте будет «Цена по запросу».
+      - label: Статус
+        name: status
+        widget: select
+        default: available
+        options:
+          - { label: В наличии, value: available }
+          - { label: Забронирована, value: reserved }
+          - { label: Продана, value: sold }
+          - { label: В частной коллекции, value: private }
+        hint: «Продана» и «В частной коллекции» скрывают цену.
+      - label: Серия
+        name: series
+        widget: relation
+        collection: series
+        value_field: "{{slug}}"
+        search_fields: [title]
+        display_fields: [title]
+        required: false
+      - label: Техника
+        name: technique
+        widget: string
+        required: false
+        hint: "Например: холст, масло"
+      - label: Размер
+        name: size
+        widget: string
+        required: false
+        hint: "Например: 60 × 80 см или А3"
+      - label: Год
+        name: year
+        widget: number
+        value_type: int
+        min: 1900
+        max: 2100
+        required: false
+      - label: Описание
+        name: description
+        widget: text
+        required: false
+        hint: Показывается при открытии картины крупно.
+      - label: Порядок
+        name: order
+        widget: number
+        value_type: int
+        required: false
+        hint: Необязательно. Работы с меньшим числом показываются первыми; без числа — по дате, новые сверху.
+      - label: Дата добавления
+        name: date
+        widget: datetime
+        default: "{{now}}"
+      - label: Скрыть с сайта
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+        hint: Картина сохранится в админке, но не будет видна на сайте.
+
+  # ------------------------------------------------------------------- Серии
+  - name: series
+    label: Серии
+    label_singular: серию
+    description: Серии — это кнопки-фильтры над галереей. Серия без картин на сайте не показывается.
+    folder: src/content/series
+    extension: md
+    format: frontmatter
+    create: true
+    slug: "{{uuid_shorter}}"
+    identifier_field: title
+    fields:
+      - label: Название
+        name: title
+        widget: string
+      - label: Описание
+        name: description
+        widget: text
+        required: false
+        hint: Показывается над галереей, когда выбрана эта серия.
+      - label: Порядок
+        name: order
+        widget: number
+        value_type: int
+        required: false
+        hint: Порядок кнопок-фильтров, меньше — левее.
+
+  # ---------------------------------------------------- Страницы и настройки
+  - name: pages
+    label: Страницы и настройки
+    files:
+      - name: about
+        label: Об авторе
+        file: src/_data/about.json
+        fields:
+          - label: Заголовок
+            name: heading
+            widget: string
+            default: Об авторе
+          - label: Фото автора
+            name: photo
+            widget: image
+            required: false
+          - label: О себе
+            name: bio
+            widget: richtext
+            required: false
+            buttons: [bold, italic, link, bulleted-list, numbered-list]
+            editor_components: []
+          - label: Разделы
+            name: sections
+            widget: list
+            required: false
+            label_singular: раздел
+            hint: Например, «Выставки», «Образование», «Публикации».
+            summary: "{{fields.title}}"
+            fields:
+              - { label: Заголовок, name: title, widget: string }
+              - label: Текст
+                name: text
+                widget: richtext
+                required: false
+                buttons: [bold, italic, link, bulleted-list, numbered-list]
+                editor_components: []
+          - label: Контакты
+            name: contacts
+            widget: object
+            hint: Заполните нужные — пустые на сайте не показываются.
+            fields:
+              - { label: Почта, name: email, widget: string, required: false }
+              - { label: Телефон, name: phone, widget: string, required: false, hint: "Например: +7 900 123-45-67" }
+              - { label: Telegram, name: telegram, widget: string, required: false, hint: "Ник (@name) или ссылка t.me/name" }
+              - { label: WhatsApp, name: whatsapp, widget: string, required: false, hint: Номер телефона }
+              - { label: Instagram, name: instagram, widget: string, required: false, hint: "Ник или ссылка. На сайте автоматически появится обязательная пометка о Meta." }
+              - { label: ВКонтакте, name: vk, widget: string, required: false, hint: "Ник или ссылка vk.com/name" }
+              - { label: Город, name: city, widget: string, required: false }
+          - label: Другие ссылки
+            name: links
+            widget: list
+            required: false
+            label_singular: ссылку
+            summary: "{{fields.label}}"
+            fields:
+              - { label: Название, name: label, widget: string, hint: "Например: Behance" }
+              - { label: Адрес, name: url, widget: string, hint: "Полная ссылка, начиная с https://" }
+
+      - name: privacy
+        label: Политика обработки персональных данных
+        file: src/_data/privacy.json
+        fields:
+          - label: Заголовок
+            name: heading
+            widget: string
+            default: Политика обработки персональных данных
+          - label: Текст
+            name: text
+            widget: richtext
+            hint: Заполните всё в [квадратных скобках] и покажите текст юристу. Ссылка на эту страницу стоит под формой «Связаться с автором».
+            buttons: [bold, italic, link, heading-two, heading-three, bulleted-list, numbered-list]
+            editor_components: []
+
+      - name: site
+        label: Настройки сайта
+        file: src/_data/site.json
+        fields:
+          - label: Имя художника
+            name: title
+            widget: string
+            hint: Показывается в шапке и в названии вкладки браузера.
+          - label: Заголовок галереи
+            name: tagline
+            widget: string
+            required: false
+            hint: "Крупный заголовок на главной, например: Живопись и графика"
+          - label: Текст под заголовком
+            name: intro
+            widget: text
+            required: false
+          - label: Описание для поисковиков
+            name: description
+            widget: text
+            hint: 1–2 предложения. Видно в Яндексе/Google и в превью ссылок.
+          - label: Адрес сайта
+            name: url
+            widget: string
+            required: false
+            hint: Заполните, только если подключите свой домен (например https://ivanova-art.ru). Для адреса github.io оставьте пустым.
+          - label: Картинка для превью ссылок
+            name: og_image
+            widget: image
+            required: false
+            hint: Показывается, когда ссылкой на сайт делятся в мессенджерах и соцсетях.
+          - label: Кнопка «Заказать»
+            name: order_button
+            widget: object
+            collapsed: true
+            hint: Пока выключена. Когда включите — у картин в наличии появится кнопка, открывающая чат в Telegram.
+            fields:
+              - { label: Показывать кнопку, name: enabled, widget: boolean, default: false, required: false }
+              - { label: Текст кнопки, name: label, widget: string, default: Заказать, required: false }
+              - { label: Telegram для заказов, name: telegram, widget: string, required: false, hint: "Ник (@name) или ссылка t.me/name" }
+              - { label: Текст сообщения, name: message, widget: string, required: false, hint: "{title} заменится названием картины" }
+          - label: Форма связи
+            name: contact_form
+            widget: object
+            collapsed: true
+            hint: Кнопка «Связаться с автором» в окне картины. Появится, когда включите и заполните оба поля — см. инструкцию docs/contact-form-setup.md.
+            fields:
+              - { label: "Показывать кнопку «Связаться с автором»", name: enabled, widget: boolean, default: false, required: false }
+              - { label: Адрес функции, name: endpoint, widget: string, required: false, hint: "Ссылка из Яндекс Облака, см. инструкцию. Начинается с https://" }
+              - { label: Почта для запасного пути, name: fallback_email, widget: string, required: false, hint: "Ваш адрес. Посетитель увидит его, только если отправка не удалась" }

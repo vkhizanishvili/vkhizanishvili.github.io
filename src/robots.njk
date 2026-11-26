@@ -1,0 +1,9 @@
+---
+permalink: /robots.txt
+eleventyExcludeFromCollections: true
+---
+User-agent: *
+Disallow: /admin/
+{%- if baseUrl %}
+Sitemap: {{ "/sitemap.xml" | absoluteUrl(baseUrl) }}
+{%- endif %}

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {%- set pageTitle = (title + " — " + site.title) if title else (site.title + (" — " + site.tagline if site.tagline else "")) %}
+  {%- set pageDescription = description or site.description %}
+  <title>{{ pageTitle }}</title>
+  <meta name="description" content="{{ pageDescription }}">
+  {%- if baseUrl %}
+  <link rel="canonical" href="{{ page.url | absoluteUrl(baseUrl) }}">
+  <meta property="og:url" content="{{ page.url | absoluteUrl(baseUrl) }}">
+  {%- endif %}
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:site_name" content="{{ site.title }}">
+  <meta property="og:title" content="{{ pageTitle }}">
+  <meta property="og:description" content="{{ pageDescription }}">
+  {%- set ogSource = site.og_image or about.photo %}
+  {%- if ogSource %}
+  <meta property="og:image" content="{% ogImage ogSource, baseUrl %}">
+  {%- endif %}
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="/assets/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+</head>
+<body class="page page--{{ pageClass or 'default' }}">
+  <a class="skip-link" href="#main">К содержанию</a>
+  {% include "partials/header.njk" %}
+  <main id="main" class="container">
+{{ content | safe }}
+  </main>
+  {% include "partials/footer.njk" %}
+  {%- for script in scripts %}
+  <script src="{{ script }}" defer></script>
+  {%- endfor %}
+</body>
+</html>

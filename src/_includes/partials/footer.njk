@@ -1,0 +1,13 @@
+<footer class="site-footer">
+  <div class="container site-footer__inner">
+    <p>© {{ currentYear }} {{ site.title }}. Все работы защищены авторским правом.</p>
+    {#- То же условие, что у раздела «Контакты» в about.njk #}
+    {%- if (about.contacts | contactsList).length or about.links.length %}
+    <p><a href="/about/#contacts">Контакты</a></p>
+    {%- endif %}
+    {#- Политика нужна вместе с формой связи; пока форма выключена, черновик не на виду #}
+    {%- if site | contactForm %}
+    <p><a href="/privacy/">Политика обработки персональных данных</a></p>
+    {%- endif %}
+  </div>
+</footer>

@@ -1,0 +1,55 @@
+<dialog class="lightbox" id="lightbox" aria-labelledby="lightbox-title">
+  <div class="lightbox__layout">
+    <div class="lightbox__stage">
+      {#- Рамка: на телефоне прижата к низу блока и уменьшается при прокрутке (photo-strip.js) #}
+      <div class="lightbox__frame">
+        <img class="lightbox__img" alt="" decoding="async">
+      </div>
+    </div>
+    <div class="lightbox__info">
+      <button type="button" class="lightbox__close" data-action="close" aria-label="Закрыть">✕</button>
+      <h2 class="lightbox__title" id="lightbox-title"></h2>
+      <p class="lightbox__meta"></p>
+      <p class="lightbox__price"></p>
+      <div class="lightbox__details"></div>
+      {#- Форма «Связаться с автором»: только если настроена в админке (или в копии для просмотра).
+          Без JavaScript не видна — отправить её без скрипта нельзя. #}
+      {%- set contactCfg = site | contactForm %}
+      {%- if contactCfg or contactPreview %}
+      <div class="contact" hidden data-endpoint="{{ contactCfg.endpoint if contactCfg else '' }}" data-mail-user="{{ contactCfg.mailUser if contactCfg else '' }}" data-mail-domain="{{ contactCfg.mailDomain if contactCfg else '' }}"{% if contactPreview %} data-preview{% endif %}>
+        <button type="button" class="btn-contact" data-action="contact">Связаться с автором</button>
+        <form class="contact__form" hidden novalidate>
+          <label class="contact__field">
+            <span class="contact__label">Имя</span>
+            <input name="name" maxlength="100" autocomplete="name">
+          </label>
+          <p class="contact__hint" data-for="name" hidden>Укажите имя</p>
+          <label class="contact__field">
+            <span class="contact__label">Телефон или почта</span>
+            <input name="contact" maxlength="100" autocomplete="on">
+          </label>
+          <p class="contact__hint" data-for="contact" hidden>Укажите телефон или почту</p>
+          <label class="contact__field">
+            <span class="contact__label">Сообщение</span>
+            <textarea name="message" maxlength="3000" rows="4"></textarea>
+          </label>
+          <input name="website" class="contact__trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button type="submit" class="btn-contact">Отправить</button>
+          <p class="contact__consent">Отправляя сообщение, вы соглашаетесь с <a href="/privacy/">обработкой персональных данных</a>.</p>
+        </form>
+        <p class="contact__done" hidden>Спасибо! {{ site.title }} ответит вам по указанному контакту.</p>
+        <div class="contact__fallback" hidden>
+          <p>Не получилось отправить. Отправьте это сообщение со своей почты:</p>
+          <p class="contact__address"></p>
+          <div class="contact__fallback-actions">
+            <a class="btn-contact contact__mail" href="#">Открыть почту</a>
+            <button type="button" class="btn-contact btn-contact--ghost contact__copy">Скопировать текст</button>
+          </div>
+        </div>
+        <p class="contact__preview" hidden>Это предпросмотр — сообщение не отправлено</p>
+      </div>
+      {%- endif %}
+      <div class="lightbox__actions"></div>
+    </div>
+  </div>
+</dialog>

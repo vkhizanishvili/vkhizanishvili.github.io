@@ -1,0 +1,11 @@
+{
+  "name": "gallery-contact-function",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Пересыльщик формы «Связаться с автором»: письмо на почту и сигнал в Telegram. Для Yandex Cloud Functions.",
+  "type": "commonjs",
+  "main": "index.js",
+  "dependencies": {
+    "nodemailer": "^7.0.0"
+  }
+}

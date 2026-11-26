@@ -1,0 +1,8 @@
+node_modules/
+_site/
+.cache/
+offline/
+# локальные настройки приложения Claude (сервер для предпросмотра)
+.claude/
+.DS_Store
+Thumbs.db

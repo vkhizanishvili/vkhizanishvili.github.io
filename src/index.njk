@@ -1,0 +1,41 @@
+---
+layout: layouts/base.njk
+pageClass: gallery
+scripts:
+  - /assets/js/photo-strip.js
+  - /assets/js/contact-form.js
+  - /assets/js/gallery.js
+---
+{%- set works = collections.works %}
+{%- set filters = collections.seriesList | seriesWithWorks(works) %}
+<section class="intro">
+  <h1 class="intro__title">{{ site.tagline or "Работы" }}</h1>
+  {%- if site.intro %}
+  <p class="intro__text">{{ site.intro }}</p>
+  {%- endif %}
+</section>
+
+{%- if filters.length %}
+<div class="filters" role="group" aria-label="Фильтр по сериям" hidden>
+  <button type="button" class="filter is-active" data-filter="all" aria-pressed="true">Все</button>
+  {%- for s in filters %}
+  <button type="button" class="filter" data-filter="{{ s.id }}" aria-pressed="false">{{ s.title }}</button>
+  {%- endfor %}
+</div>
+{%- for s in filters %}{% if s.description %}
+<p class="series-desc" data-series-desc="{{ s.id }}" hidden>{{ s.description }}</p>
+{%- endif %}{% endfor %}
+{%- endif %}
+
+{%- if works.length %}
+<div class="grid" id="gallery">
+  {%- for work in works %}
+  {%- set eager = loop.index <= 3 %}
+  {% include "partials/card.njk" %}
+  {%- endfor %}
+</div>
+{%- else %}
+<p class="empty">Скоро здесь появятся работы.</p>
+{%- endif %}
+
+{% include "partials/lightbox.njk" %}

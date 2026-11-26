@@ -1,0 +1,32 @@
+{#- Карточка картины. Атрибуты data-* — задел для корзины будущего магазина. -#}
+{%- set img = work.images[0] %}
+{%- set orderLink = site | orderUrl(work) %}
+<article class="card" id="w-{{ work.id }}" data-id="{{ work.id }}" data-title="{{ work.title }}" data-price="{{ work.price }}" data-status="{{ work.status }}" data-series="{{ work.series }}">
+  <a class="card__image" href="{{ img.src }}" aria-label="Открыть «{{ work.title }}» крупно">
+    <img src="{{ img.mid }}" srcset="{{ img.srcset }}" sizes="(min-width: 1280px) 380px, (min-width: 960px) 30vw, (min-width: 600px) 45vw, 92vw" width="{{ img.width }}" height="{{ img.height }}" alt="{{ work.title }}{% if work.meta %}, {{ work.meta }}{% endif %}" loading="{{ 'eager' if eager else 'lazy' }}" decoding="async">
+  </a>
+  <div class="card__body">
+    <h2 class="card__title">{{ work.title }}</h2>
+    {%- if work.meta %}
+    <p class="card__meta">{{ work.meta }}</p>
+    {%- endif %}
+    <p class="card__price">
+      {%- if work.priceInfo.price %}<span class="price">{{ work.priceInfo.price }}</span>{% endif -%}
+      {%- if work.priceInfo.note %}<span class="status status--{{ work.status }}">{{ work.priceInfo.note }}</span>{% endif -%}
+    </p>
+    {%- if orderLink %}
+    <a class="btn-order" href="{{ orderLink }}" target="_blank" rel="noopener">{{ site.order_button.label or "Заказать" }}</a>
+    {%- endif %}
+  </div>
+  <template class="card__details">
+    {%- if work.description %}
+    <p class="details__desc">{{ work.description }}</p>
+    {%- endif %}
+    {#- Миниатюры нужны, только если фото больше одного; список остаётся — из него окно берёт главное фото #}
+    <ul class="details__photos"{% if work.images.length < 2 %} hidden{% endif %}>
+      {%- for im in work.images %}
+      <li><a href="{{ im.src }}"><img src="{{ im.thumb }}" srcset="{{ im.srcset }}" sizes="72px" width="{{ im.width }}" height="{{ im.height }}" alt="{{ work.title }} — фото {{ loop.index }}"></a></li>
+      {%- endfor %}
+    </ul>
+  </template>
+</article>
