@@ -621,7 +621,8 @@ main.container {
   outline: 2px solid var(--text);
   outline-offset: 1px;
 }
-.contact__field.is-invalid input {
+.contact__field.is-invalid input,
+.contact__field.is-invalid textarea {
   border-color: var(--sold);
 }
 .contact__hint {
