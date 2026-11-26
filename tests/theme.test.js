@@ -76,14 +76,29 @@ test("every font source exists in node_modules", () => {
   for (const { from } of FONT_SOURCES) assert.ok(existsSync(from), from);
 });
 
+const cssValue = (css, name) => css.match(new RegExp(`${name}: (#[0-9a-f]{6});`))?.[1];
+
 test("default colours keep the hand-tuned palette, others derive shades", () => {
-  assert.ok(!themeCss(normalizeTheme({})).includes("--muted"), "today's warm greys stay in style.css");
+  const plain = themeCss(normalizeTheme({}));
+  for (const v of ["--muted", "--line", "--frame", "--sold", "--reserved"]) assert.ok(!plain.includes(v), `${v}: today's colours stay in style.css`);
   const dark = themeCss(normalizeTheme({ background: "#1d1d1f", text: "#f2f2f2" }));
-  for (const v of ["--muted", "--line", "--frame"]) assert.ok(dark.includes(`${v}: color-mix(in srgb, var(--text) `), v);
+  for (const v of ["--muted", "--line", "--frame", "--sold", "--reserved"]) assert.ok(cssValue(dark, v), `${v} is a ready colour`);
 });
 
-test("status colours stay readable on a custom background", () => {
-  assert.ok(!themeCss(normalizeTheme({})).includes("--sold"), "default look keeps today's status colours");
-  const dark = themeCss(normalizeTheme({ background: "#1d1d1f", text: "#f2f2f2" }));
-  for (const v of ["--sold", "--reserved"]) assert.ok(dark.includes(`${v}: color-mix(in srgb, `) && dark.includes("var(--text)"), v);
+test("secondary text and statuses stay readable with a mid-grey text colour", () => {
+  // кремовый фон + серый текст, тёмно-синий + серый, почти чёрный + серый (из итоговой проверки)
+  for (const [bg, text] of [["#f3ede4", "#6b6b6b"], ["#2b3a55", "#b0b0b0"], ["#1d1d1f", "#8a8a8a"], ["#1d1d1f", "#f2f2f2"]]) {
+    const css = themeCss(normalizeTheme({ background: bg, text }));
+    const target = Math.min(4.5, contrastRatio(text, bg));
+    for (const v of ["--muted", "--sold", "--reserved"]) {
+      const colour = cssValue(css, v);
+      assert.ok(colour, `${bg}/${text} ${v}`);
+      assert.ok(contrastRatio(colour, bg) >= target - 0.01, `${bg}/${text} ${v} ${colour}: ${contrastRatio(colour, bg)} < ${target}`);
+    }
+  }
+});
+
+test("dark backgrounds tell the browser to draw dark scrollbars", () => {
+  assert.ok(themeCss(normalizeTheme({ background: "#1d1d1f", text: "#f2f2f2" })).includes("color-scheme: dark"));
+  assert.ok(themeCss(normalizeTheme({ background: "#f3ede4", text: "#333333" })).includes("color-scheme: light"));
 });

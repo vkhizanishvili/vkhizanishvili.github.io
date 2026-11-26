@@ -102,6 +102,36 @@ export function normalizeTheme(raw) {
 
 const stack = (id) => `"${FONTS[id].family}", ${FONTS[id].fallback}`;
 
+const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+const toHex = (channels) => `#${channels.map((c) => Math.round(c).toString(16).padStart(2, "0")).join("")}`;
+/** Смесь двух цветов: share — доля первого (как color-mix in srgb). */
+const mix = (a, b, share) => toHex(rgb(a).map((c, i) => c * share + rgb(b)[i] * (1 - share)));
+
+// Вторичный текст и статусы должны читаться не хуже 4,5 : 1 (или как основной текст, если он слабее)
+const READABLE = 4.5;
+
+/** Ближайшая к задуманной доля смеси, при которой цвет читается на фоне. */
+function readableMix(from, toward, bg, startShare) {
+  for (let share = startShare; share <= 1.0001; share += 0.01) {
+    const colour = mix(toward, from, share);
+    if (contrastRatio(colour, bg) >= READABLE) return colour;
+  }
+  return toward;
+}
+
+/** Оттенки для выбранных фона и текста — готовыми цветами. */
+function shadesFor({ background: bg, text }) {
+  return {
+    // приглушённый текст: 58 % цвета текста, больше — если не читается
+    muted: readableMix(bg, text, bg, 0.58),
+    line: mix(text, bg, 0.11),
+    frame: mix(text, bg, 0.04),
+    // статусы: свой цвет, подмешанный к цвету текста; ближе к тексту — если не читается
+    reserved: readableMix("#a86b16", text, bg, 0.35),
+    sold: readableMix("#9b3b32", text, bg, 0.35),
+  };
+}
+
 /**
  * CSS оформления: переменные и @font-face выбранных шрифтов (без повторов).
  * При цветах по умолчанию оттенки не переопределяются — остаётся подобранная
@@ -109,18 +139,15 @@ const stack = (id) => `"${FONTS[id].family}", ${FONTS[id].fallback}`;
  */
 export function themeCss(theme) {
   const defaultColors = theme.background === DEFAULT_THEME.background && theme.text === DEFAULT_THEME.text;
-  const shades = defaultColors
-    ? []
-    : [
-        "  --muted: color-mix(in srgb, var(--text) 58%, var(--bg));",
-        "  --line: color-mix(in srgb, var(--text) 11%, var(--bg));",
-        "  --frame: color-mix(in srgb, var(--text) 4%, var(--bg));",
-        // статусы сохраняют свой цвет, но подстраивают яркость под фон — иначе на тёмном не читаются
-        "  --reserved: color-mix(in srgb, #a86b16 65%, var(--text));",
-        "  --sold: color-mix(in srgb, #9b3b32 65%, var(--text));",
-      ];
+  const s = defaultColors ? null : shadesFor(theme);
+  const shades = s
+    ? [`  --muted: ${s.muted};`, `  --line: ${s.line};`, `  --frame: ${s.frame};`, `  --reserved: ${s.reserved};`, `  --sold: ${s.sold};`]
+    : [];
+  // Тёмный фон — браузер рисует тёмные полосы прокрутки и системные элементы
+  const dark = contrastRatio(theme.background, "#ffffff") > contrastRatio(theme.background, "#000000");
   const root = [
     ":root {",
+    `  color-scheme: ${dark ? "dark" : "light"};`,
     `  --bg: ${theme.background};`,
     `  --text: ${theme.text};`,
     ...shades,

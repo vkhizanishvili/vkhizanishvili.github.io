@@ -115,3 +115,9 @@ test("admin offers the theme settings", () => {
   }
   assert.deepEqual(field("size").options.map((o) => o.value), Object.keys(SIZES));
 });
+
+test("the theme section tells when changes appear on the site", () => {
+  // У отдельного файла Sveltia не показывает description — подсказка должна быть у поля
+  const entry = collection("pages").files.find((f) => f.name === "theme");
+  assert.ok(entry.fields.some((f) => String(f.hint ?? "").includes("1–2 минуты")), "a field hint mentions 1–2 минуты");
+});

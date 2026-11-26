@@ -233,13 +233,13 @@ collections:
       - name: theme
         label: Оформление
         file: src/_data/theme.json
-        description: Цвета, шрифты и размер текста. Изменения появятся на сайте через 1–2 минуты после сохранения.
         fields:
           - label: Цвет фона
             name: background
             widget: color
             allowInput: true
             default: "#ffffff"
+            hint: Изменения в этом разделе появятся на сайте через 1–2 минуты после сохранения.
           - label: Цвет текста
             name: text
             widget: color
