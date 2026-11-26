@@ -3,6 +3,8 @@ layout: layouts/base.njk
 title: Об авторе
 permalink: /about/
 pageClass: about
+scripts:
+  - /assets/js/contact-form.js
 ---
 {%- set contacts = about.contacts | contactsList %}
 <div class="about">

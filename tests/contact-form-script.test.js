@@ -8,7 +8,7 @@ import vm from "node:vm";
 
 function loadScript() {
   const context = {
-    document: { getElementById: () => null, querySelector: () => null },
+    document: { getElementById: () => null, querySelector: () => null, querySelectorAll: () => [] },
     AbortController,
     setTimeout,
     clearTimeout,
@@ -126,4 +126,20 @@ test("buildMailto survives a broken emoji half", () => {
   const url = CF.buildMailto({ user: "v", domain: "y.ru", painting: "Утро", name: "Анна", contact: "a@b.ru", message: "текст \uD83C", link: "" });
   assert.ok(url.startsWith("mailto:v@y.ru?subject="));
   assert.ok(decodeURIComponent(url).includes("текст \uFFFD"), "broken half replaced, not thrown");
+});
+
+// --- Форма на странице «Об авторе» (без картины) ------------------------------
+
+test("pageLink points to the painting or to the page", () => {
+  assert.equal(CF.pageLink({ origin: "https://x", pathname: "/" }, "utro"), "https://x/#w-utro");
+  assert.equal(CF.pageLink({ origin: "https://x", pathname: "/about/" }), "https://x/about/");
+  assert.equal(CF.pageLink({ origin: "https://x", pathname: "/about/" }, ""), "https://x/about/");
+});
+
+test("buildMailto without a painting", () => {
+  const url = CF.buildMailto({ user: "v", domain: "y.ru", painting: "", name: "Анна", contact: "a@b.ru", message: "Здравствуйте!", link: "https://x/about/" });
+  const params = Object.fromEntries(url.split("?")[1].split("&").map((pair) => pair.split("=").map(decodeURIComponent)));
+  assert.equal(params.subject, "Сообщение с сайта");
+  assert.ok(!params.body.includes("Картина:"), params.body);
+  assert.ok(params.body.includes("Страница: https://x/about/"), params.body);
 });
