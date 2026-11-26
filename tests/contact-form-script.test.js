@@ -24,10 +24,15 @@ const CF = loadScript();
 const list = (value) => Array.from(value); // массив из песочницы → обычный массив
 
 test("validate names empty required fields", () => {
-  assert.deepEqual(list(CF.validate({ name: "", contact: "x" })), ["name"]);
-  assert.deepEqual(list(CF.validate({ name: "А", contact: "  " })), ["contact"]);
-  assert.deepEqual(list(CF.validate({ name: " ", contact: "" })), ["name", "contact"]);
-  assert.deepEqual(list(CF.validate({ name: "Анна", contact: "+7 900" })), []);
+  assert.deepEqual(list(CF.validate({ name: "", contact: "x", message: "Привет" })), ["name"]);
+  assert.deepEqual(list(CF.validate({ name: "А", contact: "  ", message: "Привет" })), ["contact"]);
+  assert.deepEqual(list(CF.validate({ name: " ", contact: "", message: "Привет" })), ["name", "contact"]);
+  assert.deepEqual(list(CF.validate({ name: "Анна", contact: "+7 900", message: "Привет" })), []);
+});
+
+test("validate requires a message", () => {
+  assert.deepEqual(list(CF.validate({ name: "А", contact: "x", message: "  " })), ["message"]);
+  assert.deepEqual(list(CF.validate({ name: "", contact: "", message: "" })), ["name", "contact", "message"]);
 });
 
 test("buildMailto encodes quotes, newlines and emoji", () => {

@@ -183,6 +183,12 @@ test("contact form is absent while switched off", () => {
   assert.ok(!pages["/"].includes('class="contact"'));
 });
 
+test("the contact form asks for a message when it is empty", async () => {
+  const html = (await build({ site: contactOn() }))["/"];
+  assert.ok(html.includes('data-for="message"'), "hint element for the message");
+  assert.ok(html.includes("Напишите сообщение"));
+});
+
 test("contact form is rendered when configured", async () => {
   const html = (await build({ site: contactOn() }))["/"];
   for (const part of [

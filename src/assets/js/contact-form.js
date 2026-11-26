@@ -24,10 +24,11 @@
   }
 
   /** Имена пустых обязательных полей. */
-  function validate({ name, contact }) {
+  function validate({ name, contact, message }) {
     const missing = [];
     if (!String(name ?? "").trim()) missing.push("name");
     if (!String(contact ?? "").trim()) missing.push("contact");
+    if (!String(message ?? "").trim()) missing.push("message");
     return missing;
   }
 
